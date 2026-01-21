@@ -195,7 +195,7 @@ end
 
 
 
-local statusLights = {}
+local statusLights = {  }
 
 ---STATUS LIGHT
 ---@param id string|number ID
@@ -247,7 +247,7 @@ end
 
 
 --- BUTTONS --- 
-local buttons = {}
+local buttons = {  }
 
 ---ADD BUTTON 
 ---@param id string|number ID
