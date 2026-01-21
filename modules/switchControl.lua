@@ -4,7 +4,7 @@ local SETTING_GATE     = "switch.outputGate"
 local SETTING_LAMP     = "switch.outputLamp"
 local SETTING_POS      = "switch.position"
 
--- Funktion für die Ersteinrichtung
+-- Function for first Setup
 local function firstTimeSetup()
     if settings.get(SETTING_PROTOCOL) == nil then
         term.clear()
@@ -33,10 +33,10 @@ local function firstTimeSetup()
     end
 end
 
--- Setup ausführen
+-- Start first time setup
 firstTimeSetup()
 
--- Variablen aus den Settings laden
+-- Load variables from settings
 local networkProtocol = settings.get(SETTING_PROTOCOL)
 local outputSideGate  = settings.get(SETTING_GATE)
 local outputSideLamp  = settings.get(SETTING_LAMP)
@@ -44,8 +44,9 @@ local switchPosition   = settings.get(SETTING_POS)
 
 local modem = peripheral.find("modem")
 
---- FUNCTIONS ---
 
+
+--- FUNCTIONS ---
 local function reset()
     term.clear()
     term.setCursorPos(1, 1)
@@ -59,7 +60,7 @@ local function initNetwork()
     if modem then
         term.clear()
         term.setCursorPos(1, 1)
-        -- Rednet öffnen (nutzt das gefundene Modem)
+        -- Open rednet 
         local modemName = peripheral.getName(modem)
         rednet.open(modemName)
         
@@ -80,13 +81,12 @@ local function initNetwork()
 end
 
 --- MAIN ---
-reset() -- Sicherstellen, dass beim Start alles aus ist
+reset()
 initNetwork()
 
 while true do
     local id, message, protocol = rednet.receive(networkProtocol)
     
-    -- Da wir auf das Protokoll filtern, kommt hier nur Relevantes an
     print("MESSAGE RECEIVED: " .. tostring(message))
 
     if message == switchPosition then
