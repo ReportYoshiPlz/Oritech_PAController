@@ -3,13 +3,13 @@ local config = {
   primaryInjectionSide = "left",
   overdrive = 5,
   activationSide = "front",
-  secondaryInjectionSide = "right",
+  sensorSide = "back",
   ring1Speed = 10,
   protocol = "Collider 1",
+  overdriveMode = false,
   logHeight = 7,
-  overdriveMode = true,
   refreshRate = 1,
-  sensorSide = "back",
+  secondaryInjectionSide = "right",
 }
 
 return config
