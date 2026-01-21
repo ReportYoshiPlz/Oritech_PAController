@@ -38,51 +38,85 @@ end
 -- INSTALLER UI
 term.clear()
 term.setCursorPos(1,1)
-print("--- Particle Accelerator Installer ---")
-print("Modus: Komplette Neuinstallation")
-print("1) Controller")
-print("2) Switch")
+term.setTextColor(colors.orange)
+print("--- PARTICLE ACCELERATOR INSTALLER ---")
+print("")
+term.setTextColor(colors.white)
+print("[INFO] Which component do you want to install? Please enter number.")
+print("")
+print("1: Controller")
+print("2: Switch")
+term.setTextColor(colors.yellow)
 write("> ")
+
+
 local choice = read()
 
 if choice == "1" then
-    print("\nLade alle Dateien von GitHub...")
-    downloadFullProject("") -- Lädt alles, auch die originale config.lua
+    print("")
+    print("[INFO] Downloading files from GitHub")
+    downloadFullProject("") 
 
-    print("\n--- Konfiguration anpassen ---")
-    write("Protokoll (Standard: Collider 1): ")
+    term.setTextColor(colors.white)
+    print("")
+    print("[INFO] Please adjust the following settings: ")
+    print("[INFO] Please enter an unique ID for your collider (Standard: 1): ")
+    term.setTextColor(colors.yellow)
+    write("> ")
     local prot = read()
-    prot = (prot ~= "" and prot or "Collider 1")
+    prot = ("Collider "..prot) or "Collider 1"
 
-    write("Primary Injection Side: ")
+    term.setTextColor(colors.white)
+    print("")
+    print("[INFO] Please specify the side for the primary injection redstone signal (e. g. LEFT, RIGHT, ...): ")
+    term.setTextColor(colors.yellow)
+    write("> ")
     local pSide = read()
 
-    write("Secondary Injection Side: ")
+    term.setTextColor(colors.white)
+    print("")
+    print("[INFO] Please specify side for the secondary injection redstone signal (e. g. RIGHT, ...):")
+    term.setTextColor(colors.yellow)
+    write("> ")
     local sSide = read()
+    
+    term.setTextColor(colors.white)
+    print("")
+    print("[INFO] Please specify side for the activation redstone signal (e. g. FRONT, ...):")
+    term.setTextColor(colors.yellow)
+    write("> ")
+    local aSide = read()
 
-    -- Bestehende config.lua laden, um andere Werte zu erhalten
+    -- OVERWRITE standard variables in config-file
     local config = require("config")
     
-    -- Werte im Table überschreiben
+    -- OVERWRITE values in table
     config.protocol = prot
     config.primaryInjectionSide = pSide
     config.secondaryInjectionSide = sSide
+    config.activationSide = aSide
 
-    -- Datei mit aktualisierten Werten neu schreiben
+    -- SAVE file with new values
     local f = fs.open("config.lua", "w")
     f.writeLine("local config = " .. textutils.serialize(config))
     f.writeLine("return config")
     f.close()
     
-    print("[OK] Einstellungen in config.lua aktualisiert.")
+    print("")
+    term.setTextColor(colors.lime)
+    print("[SUCCESS] Settings saved!")
 
 elseif choice == "2" then
-    print("\nInstalliere Switch...")
+    print("")
+    term.setTextColor(colors.white)
+    print("[INFO] Installiere Switch...")
     if fs.exists("startup.lua") then fs.delete("startup.lua") end
     downloadFile("modules/switchControl.lua", "startup.lua")
-    -- Hier könntest du analog die Settings-Logik von vorhin einbauen
+   
 end
 
-print("\nInstallation abgeschlossen! Neustart...")
+print("")
+term.setTextColor(colors.lime)
+print("[SUCCESS] Installation finished! Rebooting ...")
 sleep(2)
 os.reboot()

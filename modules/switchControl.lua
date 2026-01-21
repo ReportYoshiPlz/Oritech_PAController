@@ -10,25 +10,43 @@ local function firstTimeSetup()
         term.clear()
         term.setCursorPos(1, 1)
         term.setTextColor(colors.yellow)
-        print("--- Switch Ersteinrichtung ---")
+        print("--- SWITCH SETUP ---")
+        
+        term.setTextColor(colors.white)
+        print("")
+        print("[INFO] Please enter the unique ID of your collider (Standard: 1): ")
+        term.setTextColor(colors.yellow)
+        write("> ")
         term.setTextColor(colors.white)
 
-        write("Netzwerk Protokoll (Standard: Collider 1): ")
         local prot = read()
         settings.set(SETTING_PROTOCOL, prot ~= "" and prot or "Collider 1")
 
-        write("Seite für Gate (z.B. top): ")
+        print("")
+        print("[INFO] Where is the Gate located (e. g. TOP)?")
+        term.setTextColor(colors.yellow)
+        write("> ")
+        term.setTextColor(colors.white)
         settings.set(SETTING_GATE, read())
 
-        write("Seite für Lampe (z.B. front): ")
+        print("")
+        print("[INFO] Where is the redstone lamp located (e. g. FRONT)?")
+        term.setTextColor(colors.yellow)
+        write("> ")
+        term.setTextColor(colors.white)
         settings.set(SETTING_LAMP, read())
-
-        write("Switch Name/Position (z.B. SWITCH 1): ")
+        
+        print("")
+        print("[INFO] Please set the name of the switch (multi-switch-setup not yet implemented, set to SWITCH 1): ")
+        term.setTextColor(colors.yellow)
+        write("> ")
         settings.set(SETTING_POS, read())
 
         settings.save(".settings")
+        
+        print("")
         term.setTextColor(colors.lime)
-        print("\n[OK] Einstellungen gespeichert!")
+        print("[SUCCESS] Settings saved successfully ...")
         sleep(1)
     end
 end
