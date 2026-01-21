@@ -1,8 +1,50 @@
---- SWITCH ---
-local networkProtocol = "Collider 1"
-local outputSideGate, outputSideLamp = "top", "front"
-local switchPosition = "SWITCH 1"
+--- CONFIGURATION & SETTINGS ---
+local SETTING_PROTOCOL = "switch.protocol"
+local SETTING_GATE     = "switch.outputGate"
+local SETTING_LAMP     = "switch.outputLamp"
+local SETTING_POS      = "switch.position"
+
+-- Funktion für die Ersteinrichtung
+local function firstTimeSetup()
+    if settings.get(SETTING_PROTOCOL) == nil then
+        term.clear()
+        term.setCursorPos(1, 1)
+        term.setTextColor(colors.yellow)
+        print("--- Switch Ersteinrichtung ---")
+        term.setTextColor(colors.white)
+
+        write("Netzwerk Protokoll (Standard: Collider 1): ")
+        local prot = read()
+        settings.set(SETTING_PROTOCOL, prot ~= "" and prot or "Collider 1")
+
+        write("Seite für Gate (z.B. top): ")
+        settings.set(SETTING_GATE, read())
+
+        write("Seite für Lampe (z.B. front): ")
+        settings.set(SETTING_LAMP, read())
+
+        write("Switch Name/Position (z.B. SWITCH 1): ")
+        settings.set(SETTING_POS, read())
+
+        settings.save(".settings")
+        term.setTextColor(colors.lime)
+        print("\n[OK] Einstellungen gespeichert!")
+        sleep(1)
+    end
+end
+
+-- Setup ausführen
+firstTimeSetup()
+
+-- Variablen aus den Settings laden
+local networkProtocol = settings.get(SETTING_PROTOCOL)
+local outputSideGate  = settings.get(SETTING_GATE)
+local outputSideLamp  = settings.get(SETTING_LAMP)
+local switchPosition   = settings.get(SETTING_POS)
+
 local modem = peripheral.find("modem")
+
+--- FUNCTIONS ---
 
 local function reset()
     term.clear()
@@ -14,17 +56,20 @@ local function reset()
 end
 
 local function initNetwork()
-
     if modem then
         term.clear()
         term.setCursorPos(1, 1)
-        peripheral.find("modem", rednet.open)
+        -- Rednet öffnen (nutzt das gefundene Modem)
+        local modemName = peripheral.getName(modem)
+        rednet.open(modemName)
+        
         term.setTextColor(colors.white)
-        print("[INFO   ] Modem found")
+        print("[INFO   ] Modem found: " .. modemName)
         term.setTextColor(colors.lime)
         print("[SUCCESS] Connected to network")
         term.setTextColor(colors.white)
-        print("[INFO   ] Network Protocol: " .. networkProtocol)
+        print("[INFO   ] Protocol: " .. networkProtocol)
+        print("[INFO   ] Position: " .. switchPosition)
         rednet.broadcast(switchPosition .. " ready", networkProtocol)
     else 
         term.clear()
@@ -32,44 +77,36 @@ local function initNetwork()
         term.setTextColor(colors.red)
         print("[ERROR  ] No modem detected")
     end 
-   
-
 end
 
-
---- MAIN ---.
+--- MAIN ---
+reset() -- Sicherstellen, dass beim Start alles aus ist
 initNetwork()
 
 while true do
-    local eventData = { os.pullEvent() }
-    -- local id, message = rednet.receive(networkProtocol)
-    local event = eventData[1]
+    local id, message, protocol = rednet.receive(networkProtocol)
+    
+    -- Da wir auf das Protokoll filtern, kommt hier nur Relevantes an
+    print("MESSAGE RECEIVED: " .. tostring(message))
 
-    if event == "rednet_message" and eventData[4] == networkProtocol then
-        print("MESSAGE RECEIVED")
-        local message = eventData[3]
+    if message == switchPosition then
+        rs.setOutput(outputSideGate, true)
+        rs.setOutput(outputSideLamp, true)
+        term.setTextColor(colors.lime)
+        print("[SUCCESS] Redirect " .. switchPosition .. " active")
 
-        if message == switchPosition then
-            rs.setOutput(outputSideGate, true)
-            rs.setOutput(outputSideLamp, true)
-            term.setTextColor(colors.lime)
-            print("[SUCCESS] Redirect " .. switchPosition .. " active")
-        end
+    elseif message == "RESET" then
+        rs.setOutput(outputSideGate, false)
+        rs.setOutput(outputSideLamp, false)
+        term.setTextColor(colors.orange)
+        print("[INFO   ] Termination sequence received ...")
+        print("[INFO   ] Resetting ...")
+        sleep(1)
+        reset()
 
-        if message == "RESET" then
-            rs.setOutput(outputSideGate, false)
-            rs.setOutput(outputSideLamp, false)
-            term.setTextColor(colors.orange)
-            print("[INFO   ] Termination sequence received ...")
-            print("[INFO   ] Resetting ...")
-            sleep(1)
-            reset()
-        end
-
-        if message == "PING" then
-            initNetwork()
-            reset()
-        end
+    elseif message == "PING" then
+        initNetwork()
+        reset()
     end  
 end
 
